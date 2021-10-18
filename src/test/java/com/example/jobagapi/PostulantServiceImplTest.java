@@ -1,6 +1,7 @@
 package com.example.jobagapi;
 
 import com.example.jobagapi.domain.model.Postulant;
+import com.example.jobagapi.domain.model.User;
 import com.example.jobagapi.domain.repository.PostulantRepository;
 import com.example.jobagapi.domain.service.PostulantService;
 import com.example.jobagapi.exception.ResourceNotFoundException;
@@ -8,6 +9,9 @@ import com.example.jobagapi.service.PostulantServiceImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -17,15 +21,16 @@ import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
-import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 public class PostulantServiceImplTest {
-    @MockBean
+    @Mock
     private PostulantRepository postulantRepository;
-    @Autowired
-    private PostulantService postulantService;
+    @InjectMocks
+    private PostulantService postulantService = new PostulantServiceImpl();
 
     @TestConfiguration
     static class PostulantServiceImplTestConfiguration {
@@ -41,7 +46,9 @@ public class PostulantServiceImplTest {
         String name = "example@upc.edu.pe";
         String password = "Nota#20";
         Postulant postulant = new Postulant(id, name, "Villegas", "email", 2L, password, "document","civil");
-        Postulant savedPostulant = postulantRepository.save(postulant);
+        when(postulantRepository.save(Mockito.any(Postulant.class))).thenReturn(new Postulant());
+        when(postulantRepository.findById(id)).thenReturn(Optional.of(postulant));
+        Postulant savedPostulant = postulantService.getPostulantById(postulant.getId());
         assertNotNull(savedPostulant);
     }
 
@@ -87,8 +94,8 @@ public class PostulantServiceImplTest {
 
         String newPassword = "Nota@20";
         postulant.setPassword(newPassword);
-        postulantRepository.save(postulant);
-        Optional<Postulant> updatePostulant = postulantRepository.findById(id);
-        assertThat(updatePostulant.get().getPassword()).isEqualTo(newPassword);
+        when(postulantRepository.findById(id)).thenReturn(Optional.of(postulant));
+        Postulant updatePostulant = postulantService.getPostulantById(id);
+        assertEquals("Nota@20",updatePostulant.getPassword());
     }
 }

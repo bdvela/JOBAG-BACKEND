@@ -4,9 +4,13 @@ import com.example.jobagapi.domain.repository.UserRepository;
 import com.example.jobagapi.domain.service.UserService;
 import com.example.jobagapi.exception.ResourceNotFoundException;
 import com.example.jobagapi.service.UserServiceImpl;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -17,15 +21,18 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
-import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
+
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
     public class UserServiceImplTest {
-        @MockBean
+        @Mock
         private UserRepository userRepository;
-        @Autowired
-        private UserService userService;
+        @InjectMocks
+        private UserServiceImpl userService= new UserServiceImpl();
 
         @TestConfiguration
         static class UserServiceImplTestConfiguration {
@@ -41,8 +48,10 @@ import static org.mockito.Mockito.when;
             String name = "example@upc.edu.pe";
             String password = "Nota#20";
             User user = new User().setId(id).setFirstname(name).setPassword(password);
-            User savedUser = userRepository.save(user);
-            assertNotNull(savedUser);
+            when(userRepository.save(Mockito.any(User.class))).thenReturn(new User());
+            when(userRepository.findById(id)).thenReturn(Optional.of(user));
+            User savedUser = userService.getUserById(user.getId());
+            Assertions.assertNotNull(savedUser);
         }
 
         @Test
@@ -87,9 +96,9 @@ import static org.mockito.Mockito.when;
 
             String newPassword = "Nota@20";
             user.setPassword(newPassword);
-            userRepository.save(user);
-            Optional<User> updateUser = userRepository.findById(id);
-            assertThat(updateUser.get().getPassword()).isEqualTo(newPassword);
+            when(userRepository.findById(id)).thenReturn(Optional.of(user));
+            User updateUser = userService.getUserById(id);
+            assertEquals("Nota@20",updateUser.getPassword());
         }
     }
 

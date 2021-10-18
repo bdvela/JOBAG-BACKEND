@@ -17,7 +17,7 @@ public class Employeer extends User{
                 super();
         }
 
-        public Employeer(Long id,  @NotNull String firstname,  @NotNull String lastname,  @NotNull String email, @NotNull Long number, @NotNull String password, String document,String posicion) {
+        public Employeer(Long id,   String firstname,  String lastname,   String email,  Long number, String password, String document,String posicion) {
                 super(id, firstname, lastname, email, number, password, document);
                 this.posicion = posicion;
 

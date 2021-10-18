@@ -9,9 +9,14 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import lombok.extern.log4j.Log4j2;
+import org.apache.catalina.connector.Response;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -21,16 +26,20 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Random;
+import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Log4j2
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+
 public class RegisterEmployeerSteps {
     @LocalServerPort
     private RestTemplate restTemplate = new RestTemplate();
-    private String postUrl="http://localhost:8080";
+    private String postUrl="http://localhost:8080/api";
     private String error=null;
     Long cont = 1L;
     Long employeerId = 1L + cont;
@@ -40,13 +49,14 @@ public class RegisterEmployeerSteps {
 
     Long number = randomLong();
 
+    @Test
     @Given("I can sign up as a employeer")
     public void i_can_sign_up_as_a_employeer() {
-        String url=postUrl + "/api" + "/employeers/";
-        String allEmployeers=restTemplate.getForObject(url, String.class);
-        log.info(allEmployeers);
-        assertTrue(!allEmployeers.isEmpty());
+        String url=postUrl + "/employeers/";
+        ResponseEntity<String> allEmployeers=restTemplate.getForEntity(url, String.class);
+        assertEquals(allEmployeers.getStatusCode(),HttpStatus.OK);
     }
+
 
     public String randomString() {
         byte[] array = new byte[7]; // length is bounded by 7
@@ -61,8 +71,9 @@ public class RegisterEmployeerSteps {
         return generatedLong;
     }
 
+    @Test
     @Given("I sending employeer to be created with employeer {long}")
-    public void i_sending_employer(Long id) {
+    public void i_sending_employer() {
         String url=postUrl + "/api" + "/employeers/";
         Employeer newEmployeer = new Employeer(employeerId,"firstname","lastname",email,randomLong(),"password","document","posicion");
         Employeer employeer=restTemplate.postForObject(url,newEmployeer,Employeer.class);

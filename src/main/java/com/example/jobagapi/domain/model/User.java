@@ -17,27 +17,21 @@ public class User extends AuditModel{
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @NotNull
     private String firstname;
-    @NotNull
+
     private String lastname;
 
-
-
-
-
-    @NotNull
     private String email;
-    @NotNull
+
     private Long number;
-    @NotNull
+
     private String password;
     private String document;
     public User (){
         super();
     }
 
-    public User(Long id,  @NotNull String firstname,  @NotNull String lastname,  @NotNull String email, @NotNull Long number, @NotNull String password, String document) {
+    public User(Long id,   String firstname,   String lastname,   String email,  Long number,  String password, String document) {
        super();
         this.id = id;
         this.firstname = firstname;
